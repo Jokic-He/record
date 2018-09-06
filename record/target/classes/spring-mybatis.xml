@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+    http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.2.xsd
+    http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd">
+
+
+	<!--连接数据库的相关信息的配置文件位置 -->
+	<context:property-placeholder location="classpath:config.properties" />
+
+	<!-- 启用注解 -->
+	<context:annotation-config />
+
+	<!-- 启动组件扫描，排除@Controller组件，该组件由SpringMVC配置文件扫描 -->
+	<context:component-scan base-package="com.sunwin">
+		<context:exclude-filter type="annotation"
+			expression="org.springframework.stereotype.Controller" />
+	</context:component-scan>
+	
+	 <!-- 开启aop注解方式,默认为false -->    
+     <aop:aspectj-autoproxy/>
+
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"
+		init-method="init" destroy-method="close">
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+
+		<!-- 初始化连接大小 -->
+		<property name="initialSize" value="0" />
+		<!-- 连接池最大使用连接数量 -->
+		<property name="maxActive" value="20" />
+
+		<!-- 连接池最小空闲 -->
+		<property name="minIdle" value="0" />
+		<!-- 获取连接最大等待时间 -->
+		<property name="maxWait" value="60000" />
+		<property name="poolPreparedStatements" value="true" />
+		<property name="maxPoolPreparedStatementPerConnectionSize"
+			value="33" />
+		<!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+		<property name="timeBetweenEvictionRunsMillis" value="60000" />
+		<!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+		<property name="minEvictableIdleTimeMillis" value="25200000" />
+		<!-- 打开removeAbandoned功能 -->
+		<property name="removeAbandoned" value="true" />
+		<!-- 1800秒，也就是30分钟 -->
+		<property name="removeAbandonedTimeout" value="1800" />
+		<!-- 关闭abanded连接时输出错误日志 -->
+		<property name="logAbandoned" value="true" />
+		<!-- 监控数据库 -->
+		<property name="filters" value="mergeStat" />
+	</bean>
+
+	<bean id="tongdao" class="com.sunwin.record.entity.tongdao">
+		<property name="tongdao" value="0" />
+		<property name="fenjihao" value="${zero.fenji}" />
+	</bean>
+
+
+	<!--<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean"> 
+		<property name="dataSource" ref="dataSource" /> </bean> -->
+
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="typeAliasesPackage" value="com.sunwin" />
+		<property name="mapperLocations" value="classpath:/mapper/**/*.xml" />
+		<property name="configLocation" value="classpath:/mybatis-config.xml"></property>
+
+	</bean>
+	<!--表示自动扫描con.suwnin下的每个mapper映射文件 -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.sunwin.*.dao" />
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+	</bean>
+
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	<!--事务管理 -->
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+	<!-- Shiro's main business-tier object for web-enabled applications -->
+	<!-- 項目自定义的Realm -->
+	<bean id="myShiroRealm" class="com.sunwin.shiro.ShiroRealm">
+	</bean>
+
+	<bean id="cacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager" />
+
+	<bean id="sessionDAO" class="org.apache.shiro.session.mgt.eis.MemorySessionDAO" />
+
+
+	<!-- 自定义会话管理配置 -->
+	<bean id="sessionManager"
+		class="org.apache.shiro.web.session.mgt.DefaultWebSessionManager">
+		<property name="sessionDAO" ref="sessionDAO" />
+
+		<!-- 会话超时时间，单位：毫秒 -->
+		<property name="globalSessionTimeout" value="${session.sessionTimeout}" />
+
+		<!-- 定时清理失效会话, 清理用户直接关闭浏览器造成的孤立会话 -->
+		<property name="sessionValidationInterval" value="${session.sessionTimeoutClean}" />
+		<!-- <property name="sessionValidationSchedulerEnabled" value="false"/> -->
+		<property name="sessionValidationSchedulerEnabled" value="true" />
+
+		<!-- 这一句是关键 -->
+		<property name="sessionIdCookie" ref="sessionIdCookie" />
+
+		<property name="sessionIdCookieEnabled" value="true" />
+	</bean>
+
+	<!-- 指定本系统SESSIONID, 默认为: JSESSIONID 问题: 与SERVLET容器名冲突, 如JETTY, TOMCAT 等默认JSESSIONID, 
+		当跳出SHIRO SERVLET时如ERROR-PAGE容器会为JSESSIONID重新分配值导致登录会话丢失! -->
+	<bean id="sessionIdCookie" class="org.apache.shiro.web.servlet.SimpleCookie">
+		<constructor-arg name="name" value="jeesite.session.id" />
+	</bean>
+
+
+	<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+		<property name="realm" ref="myShiroRealm" />
+		<property name="cacheManager" ref="cacheManager" />
+		<property name="sessionManager" ref="sessionManager" />
+
+	</bean>
+
+	<!-- Shiro Filter -->
+	<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+		<property name="securityManager" ref="securityManager" />
+		<property name="loginUrl" value="/login.do" />
+		<property name="successUrl" value="/toMain.do" />
+		<property name="unauthorizedUrl" value="/login.do" />
+		<property name="filterChainDefinitions">
+			<value>
+				/static/** = anon
+				/login.do=anon
+				/toGetD.do=anon
+				/toLogin.do=anon
+				/music/**=anon
+				/talent/**.do=anon
+				/**.do=authc
+				/**/**.do = authc
+			</value>
+		</property>
+	</bean>
+
+
+	<!-- 开启权限控制的注解功能并且配置aop -->
+	<!-- 后处理器：通过动态代理在某bean实例化的前增强。:自己去找权限注解 -->
+	<bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor" />
+	<!-- 切面自动代理：相当于以前的AOP标签配置 advisor:切面 advice:通知 -->
+	<bean
+		class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"
+		depends-on="lifecycleBeanPostProcessor">
+
+	</bean>
+
+	<!-- Advisor切面配置：授权属性的切面 -->
+	<bean
+		class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+		<!-- 注入安全管理器 -->
+		<property name="securityManager" ref="securityManager" />
+	</bean>
+
+
+</beans>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sunwin.record.dao.recordDao">
+
+	<sql id="lineColumns">
+		a.id AS "id",
+		a.atpworkstate AS "atpworkstate",
+		a.atpconstate AS
+		"atpconstate",
+		a.atpdtmf AS "atpdtmf",
+		a.atpcallerid AS
+		"atpcallerid",
+		a.atpchn AS "atpchn"
+	</sql>
+
+	<sql id="recordColumns">
+		a.id AS "id",
+		a.atpdirect AS "atpdirect",
+		a.atpdtmf AS
+		"atpdtmf",
+		a.atpcaller AS "atpcaller",
+		a.atpchnum AS "atpchnum",
+		a.atpstarttime AS "atpstarttime",
+		a.atpendtime AS "atpendtime",
+		a.atprecordurl AS "atprecordurl"
+	</sql>
+
+
+
+	<select id="getLine" resultType="Line">
+		SELECT
+		<include refid="lineColumns" />
+		FROM atp_line a
+	</select>
+
+	<select id="getRecord" resultType="record">
+		SELECT
+		<include refid="recordColumns" />
+		FROM atp_record a
+		WHERE 1=1 
+		<if test="atpdirect !=null and atpdirect !=''">
+			and a.atpdirect=#{atpdirect}
+		</if>
+		<if test="atpdtmf !=null and atpdtmf !=''">
+			and a.atpdtmf=#{atpdtmf}
+		</if>
+		<if test="atpcaller !=null and atpcaller !=''">
+			and a.atpcaller=#{atpcaller}
+		</if>
+		<if test="atpchnum !=null and atpchnum !=''">
+			and a.atpchnum=#{atpchnum}
+		</if>
+		<if test="atpstarttime != null and  atpstarttime != ''">
+            <![CDATA[ and a.atpstarttime >= #{atpstarttime}]]>
+		</if>
+		<if test="atpendtime != null and  atpendtime != ''">
+            <![CDATA[ and a.atpendtime <= #{atpendtime}]]>
+		</if>
+
+	</select>
+
+	<select id="getAllRecord" resultType="record">
+		SELECT
+		<include refid="recordColumns" />
+		FROM atp_record a
+
+	</select>
+	
+	<select id="getTodayRecord" resultType="record">
+	SELECT 
+	<include refid="recordColumns" />
+	FROM atp_record a 
+	WHERE 1=1 
+	<if test="atpstarttime != null and  atpstarttime != ''">
+            <![CDATA[ and a.atpstarttime >= #{atpstarttime}]]>
+		</if>
+		<if test="atpendtime != null and  atpendtime != ''">
+            <![CDATA[ and a.atpendtime <= #{atpendtime}]]>
+	</if>
+	</select>
+	
+	<select id="getUrl" resultType="String">
+	SELECT recordUrl 
+	FROM setting 
+	</select>
+	
+	<update id="setUrl" >
+	UPDATE setting 
+	set  recordUrl=#{url}
+	</update>
+	
+	
+</mapper>

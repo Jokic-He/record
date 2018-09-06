@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sunwin.sys.dao.sysDao">
+
+	<sql id="UserColumns">
+		a.id AS "id",
+		a.username AS "username",
+		a.password AS
+		"password",
+		a.department AS "department",
+		a.roleId AS "roleId",
+		a.createDate AS "createDate",
+		a.lastLoginDate AS "lastLoginDate",
+		a.state AS "state",
+		a.phoneCode AS "phoneCode"
+	</sql>
+
+	<sql id="DepartmentColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.description AS "description",
+		a.level AS "level",
+		a.parentid AS "parentid"
+	</sql>
+
+	<sql id="PermissionColumns">
+		a.id AS "id",
+		a.permission AS "permission",
+		a.pDescription AS "pDescription"
+	</sql>
+
+	<sql id="RoleColumns">
+		a.id AS "id",
+		a.roleName AS "roleName",
+		a.rDescription AS "rDescription"
+	</sql>
+
+	<sql id="role_permissionColumns">
+		a.id AS "id",
+		a.roleid AS "roleid",
+		a.permissionid AS "permissionid"
+	</sql>
+	
+	<sql id="onlineColumns">
+	    a.userid AS "userid",
+	    a.lastLogin AS "lastLogin"
+	</sql>
+
+	<select id="getUserByName" resultType="User">
+		SELECT
+		<include refid="UserColumns" />
+		FROM user a
+		WHERE a.username=#{username} and a.state != 3
+		LIMIT 1
+	</select>
+
+	<select id="getUsers" resultType="User">
+		SELECT
+		<include refid="UserColumns" />
+		FROM user a
+		WHERE a.state != 3
+	</select>
+
+	<insert id="signup">
+		INSERT INTO user
+		(id,username,password,department,roleId,createDate,lastLoginDate,state,phoneCode
+		) VALUES
+		(#{id},#{username},#{password},#{department},#{roleId},#{createDate},#{lastLoginDate},#{state},#{phoneCode}
+		)
+	</insert>
+
+	<select id="getUserById" resultType="User">
+		SELECT
+		<include refid="UserColumns" />
+		FROM user a
+		WHERE a.id=#{id}
+		LIMIT 1
+	</select>
+
+	<select id="findAllDepartment" resultType="Department">
+		SELECT
+		<include refid="DepartmentColumns" />
+		FROM department a
+		WHERE a.state !=1
+	</select>
+	
+	<select id="findAllDepartmentEx5" resultType="Department">
+		SELECT
+		<include refid="DepartmentColumns" />
+		FROM department a
+		WHERE a.state !=1 AND a.level !=5
+	</select>
+	
+	<select id="findDepartmentById" resultType="Department">
+		SELECT
+		<include refid="DepartmentColumns" />
+		FROM department a
+		WHERE a.state !=1 AND a.id=#{id}
+	</select>
+
+	<insert id="addDepartment">
+		INSERT INTO department (id,name,description,level,parentid,state)
+		VALUES
+		(#{id},#{name},#{description},#{level},#{parentid},#{state})
+	</insert>
+
+	<select id="findPermissionByRoleid" resultType="role_permission">
+		SELECT
+		<include refid="role_permissionColumns" />
+		FROM role_permission a
+		WHERE a.roleid=#{roleid}
+	</select>
+
+	<select id="findPermissionByIds" resultType="Permission">
+		SELECT
+		<include refid="PermissionColumns" />
+		FROM permission a
+		WHERE 1=1 
+		<if test="ids.size()>0">
+			and a.id in
+			<foreach collection="ids" item="id" separator="," open="("
+				close=")">
+				#{id}
+			</foreach>
+		</if>
+	</select>
+
+	<update id="updateLogin">
+		UPDATE user
+		SET state = #{state},
+		lastLoginDate=#{lastLoginDate}
+		WHERE id=#{id}
+	</update>
+
+	<update id="modifyUser">
+		UPDATE user
+		SET id=#{id}
+		<if test="username!=null and username!=''">
+			,username=#{username}
+		</if>
+		<if test="password!=null and password!=''">
+			,password=#{password}
+		</if>
+		<if test="department!=null and department!=''">
+			,department=#{department}
+		</if>
+		WHERE id=#{id}
+	</update>
+
+	<update id="deleteUser">
+		UPDATE user
+		SET state=3
+		WHERE id=#{id}
+	</update>
+
+	<select id="getUrl" resultType="String">
+		SELECT recordUrl
+		FROM setting
+	</select>
+
+	<select id="getOnline" resultType="int">
+		SELECT COUNT(*)
+		FROM user
+		WHERE state = 1
+	</select>
+
+	<select id="getUpLine" resultType="int">
+		SELECT COUNT(*)
+		FROM user
+		WHERE state <![CDATA[!= ]]>3
+	</select>
+	
+    <select id="getRoles" resultType="Role">
+        SELECT <include refid="RoleColumns"></include>
+        FROM
+        role a
+        WHERE a.id <![CDATA[!= ]]> '00713dc3274b45d990f8bd947bf4d8ff'
+    </select>
+
+</mapper>

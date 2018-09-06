@@ -1,0 +1,54 @@
+@CHARSET "UTF-8";
+
+/** 清除浏览器的默认样式 **/
+*{
+	margin: 0;
+	padding: 0;
+}
+
+/** 设置top背景样式 **/
+.top-div{
+	width: 100%;
+	height: 100%;
+	background-size:100%;
+	background-image: url("/nbJob/images/sys/top_bg.png");
+	min-height: 100%;
+	overflow: hidden; 
+	margin-top: 0px;
+	margin-left: 0px;
+}
+
+/** 页面顶部的退出按钮 **/
+.logout-img{
+	margin-top: 35px;
+	margin-right: 60px;
+	float: right;
+	border-radius: 6px;
+	-webkit-border-radius: 6px;
+	-moz-border-radius: 6px;
+}
+
+.show-div{
+	width: 1190px;
+	height: 100px;
+	margin: 0 auto; 
+	display: inline;
+	float: left;
+}
+
+.show-logo-div{
+	width: 130px;
+	height: 100px;
+	float: left;
+}
+.show-user-info{
+	width: 800px;
+	height: 50px;
+	font-size: 28px;
+	font-family: serif;
+	display: inline;
+	color:white;
+	margin-top: 35px;
+	margin-left: 100px;
+	float: left;
+}

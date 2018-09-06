@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sunwin.talent.dao.talentDao">
+
+	<sql id="talentColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.openid AS
+		"openid",
+		a.birth AS "birth",
+		a.sex AS "sex",
+		a.address AS "address",
+		a.school AS "school",
+		a.xueli AS
+		"xueli",
+		a.major AS "major",
+		a.tel AS "tel",
+		a.email AS "email",
+		a.resume AS "resume",
+		a.introduce AS
+		"introduce"
+
+	</sql>
+	
+	<insert id="saveResume">
+	INSERT INTO talent
+	(id,name,openid,birth,sex,address,school,xueli,major,tel,email,resume,introduce)
+	VALUES
+	(#{id},#{name},#{openid},#{birth},#{sex},#{address},#{school},#{xueli},#{major},#{tel},#{email},#{resume},#{introduce})
+	
+	
+	</insert>
+	
+	<select id="findByOpenid">
+	SELECT 
+	a.name
+	FROM talent a
+	WHERE a.openid=#{openid}
+	LIMIT 1
+	</select>
+	
+	<update id="updateResume">
+	UPDATE talent  SET
+	openid=#{openid} 
+	<if test="name!=null and name!=''">
+	,name=#{name}
+	</if>
+	,birth=#{birth}
+	,sex=#{sex}
+	<if test="address!=null and address!=''">
+	,address=#{address}
+	</if>
+	<if test="school!=null and school!=''">
+	,school=#{school}
+	</if>
+	<if test="xueli!=null and xueli!=''">
+	,xueli=#{xueli}
+	</if>
+	<if test="major!=null and major!=''">
+	,major=#{major}
+	</if>
+	<if test="tel!=null and tel!=''">
+	,tel=#{tel}
+	</if>
+	<if test="email!=null and email!=''">
+	,email=#{email}
+	</if>
+	<if test="resume!=null and resume!=''">
+	,esume=#{esume}
+	</if>
+	<if test="introduce!=null and introduce!=''">
+	,introduce=#{introduce}
+	</if>
+	</update>
+	
+</mapper>	

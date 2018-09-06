@@ -1,0 +1,23 @@
+@CHARSET "UTF-8";
+/** form元素 **/
+form {
+	margin: 10px 1px;
+}
+label,input{
+	font-size: 16px;
+	margin-left: 5px;
+}
+.pubDiv{
+	margin-top: 10px;
+}
+
+.pubInput{
+	padding-left: 15px;
+}
+
+textarea{
+	width: 427px;
+	height: 110px;
+	resize : none;
+	font-size: 16px;
+}
